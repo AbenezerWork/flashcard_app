@@ -3,6 +3,7 @@ import 'package:flashcard_app/pages/add_flashcard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 import '../services/storage_service.dart';
 import '../components/my_text.dart';
 
@@ -20,11 +21,14 @@ class DeckPage extends StatefulWidget {
 
 class _DeckPageState extends State<DeckPage> {
   List<dynamic> _decks = [];
+  bool _isPageView = true;
+  List<Flashcard> _shuffledFlashcards = [];
 
   @override
   void initState() {
     super.initState();
     _fetchDecks();
+    _shuffleFlashcards();
   }
 
   Future<void> _fetchDecks() async {
@@ -48,8 +52,19 @@ class _DeckPageState extends State<DeckPage> {
     }
   }
 
+  void _shuffleFlashcards() {
+    _shuffledFlashcards = List.from(widget.flashcards);
+    _shuffledFlashcards.shuffle(Random());
+  }
+
   void _refreshFlashcards() {
     widget.onRefresh();
+  }
+
+  void _toggleView() {
+    setState(() {
+      _isPageView = !_isPageView;
+    });
   }
 
   @override
@@ -57,6 +72,12 @@ class _DeckPageState extends State<DeckPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(_isPageView ? Icons.view_list : Icons.view_carousel),
+            onPressed: _toggleView,
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -64,12 +85,10 @@ class _DeckPageState extends State<DeckPage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
               ),
               child: Text(
                 'Menu',
                 style: TextStyle(
-                  color: Colors.white,
                   fontSize: 24,
                 ),
               ),
@@ -117,24 +136,37 @@ class _DeckPageState extends State<DeckPage> {
                   );
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
-      body: widget.flashcards.isEmpty
+      body: _shuffledFlashcards.isEmpty
           ? Center(child: PrettyTextWidget(text: "You don't have any flashcards yet. Click the + button to add a flashcard."))
-          : PageView.builder(
-              itemCount: widget.flashcards.length,
-              itemBuilder: (context, index) {
-                return Flashcard(
-                  question: widget.flashcards[index].question,
-                  answer: widget.flashcards[index].answer,
-                  category: widget.flashcards[index].category,
-                  id: widget.flashcards[index].id,
-                  onDelete: _refreshFlashcards,
-                );
-              },
-            ),
+          : _isPageView
+              ? PageView.builder(
+                  itemCount: _shuffledFlashcards.length,
+                  itemBuilder: (context, index) {
+                    return Flashcard(
+                      question: _shuffledFlashcards[index].question,
+                      answer: _shuffledFlashcards[index].answer,
+                      category: _shuffledFlashcards[index].category,
+                      id: _shuffledFlashcards[index].id,
+                      onDelete: _refreshFlashcards,
+                    );
+                  },
+                )
+              : ListView.builder(
+                  itemCount: _shuffledFlashcards.length,
+                  itemBuilder: (context, index) {
+                    return Flashcard(
+                      question: _shuffledFlashcards[index].question,
+                      answer: _shuffledFlashcards[index].answer,
+                      category: _shuffledFlashcards[index].category,
+                      id: _shuffledFlashcards[index].id,
+                      onDelete: _refreshFlashcards,
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(

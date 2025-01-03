@@ -78,9 +78,11 @@ class _FlashcardState extends State<Flashcard> {
               ),
               SizedBox(height: 10),
               if (_isAnswerVisible)
-                Text(
-                  widget.answer,
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                Center(
+                  child: Text(
+                    widget.answer,
+                    style: TextStyle(fontSize: 24, color: Colors.deepPurple[500]),
+                  ),
                 ),
             ],
           ),

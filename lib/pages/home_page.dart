@@ -63,13 +63,9 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
               child: Text(
                 'Menu',
                 style: TextStyle(
-                  color: Colors.white,
                   fontSize: 24,
                 ),
               ),
